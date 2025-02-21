@@ -14,7 +14,7 @@ echo ""
 echo -e "\e[31;43m***** FREE AND USED MEMORY *****\e[0m"
 free
 echo ""
-#System uptime
+#System Uptime
 echo -e "\e[31;43m***** SYSTEM UPTIME *****\e[0m"
 uptime
 echo ""
@@ -22,7 +22,7 @@ echo ""
 echo -e "\e[31;43m***** LOGGED-IN USERS *****\e[0m"
 who
 echo ""
-#Memory consumption
+#Memory Consumption
 echo -e "\e[31;43m***** TOP 5 PROCESSES *****\e[0m"
 ps -eo %mem,%cpu,comm --sort=-%mem | head -n 6
 echo ""
