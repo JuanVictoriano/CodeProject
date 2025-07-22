@@ -21,15 +21,15 @@ function setupMonthlyArchiveTrigger() {
     }
   }
 
-  // Create a new monthly trigger that runs on the 1st of the month at a specific time (e.g., 5:00 AM)
+  // Create a new monthly trigger that runs on the 1st of the month at a specific time, below it will run on the 1st, 5:01 AM
   ScriptApp.newTrigger('archiveInbox')
       .timeBased()
       .onMonthDay(1)
       .atHour(5)
-      .nearMinute()
+      .nearMinute(1)
       .create();
 
-  Logger.log('Monthly archive trigger set up to run on the 1st of the month at 5:00 AM.');
+  Logger.log('Monthly archive trigger set up to run on the 1st of the month at 5:01 AM.');
 }
 
 /**
