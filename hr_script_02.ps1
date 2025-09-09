@@ -1,53 +1,48 @@
-# Script to create an index file for importing documents from a Google Drive account
-
-# Set the base directory where you want to store the index file
-$baseDirectory = "C:\Users\YourUser\Documents\ImportIndex"
-if (-not (Test-Path -Path $baseDirectory)) {
-    New-Item -Path $baseDirectory -ItemType Directory
+/**
+ * Archives all emails in the inbox on a monthly basis, by Juan Victoriano.
+ */
+function archiveInbox() {
+  var inbox = GmailApp.getInboxThreads();
+  for (var i = 0; i < inbox.length; i++) {
+    inbox[i].moveToArchive();
+  }
+  Logger.log('Successfully archived ' + inbox.length + ' threads.');
 }
 
-# Install required NuGet package for Google Drive API
-Install-Package -Name Google.Apis.Drive.v3 -Source NuGet.org
+/**
+ * Sets up a monthly trigger to run the archiveInbox function.
+ */
+function setupMonthlyArchiveTrigger() {
+  // Delete any existing monthly triggers for this function
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'archiveInbox' && triggers[i].getEventType() === ScriptApp.EventType.CLOCK) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
 
-# Import required Google Drive namespaces
-Add-Type -Path "C:\Path\To\Google.Apis.Drive.v3.dll"
-Add-Type -Path "C:\Path\To\Google.Apis.Auth.dll"
+  // Create a new monthly trigger that runs on the 1st of the month at a specific time
+  ScriptApp.newTrigger('archiveInbox')
+      .timeBased()
+      .onMonthDay(1)
+      .atHour(7)
+      .nearMinute(1)
+      .create();
 
-# Configure the Google Drive API
-$clientId = "YOUR_CLIENT_ID"
-$clientSecret = "YOUR_CLIENT_SECRET"
-$redirectUri = "urn:ietf:wg:oauth:2.0:oob"
-
-# Create Google Drive service
-$googleDriveService = New-Object -TypeName Google.Apis.Drive.v3.DriveService
-
-# Set up credentials
-$credential = Google.Apis.Auth.OAuth2.GoogleWebAuthorizationBroker::AuthorizeAsync(
-    (New-Object Google.Apis.Auth.OAuth2.ClientSecrets -Property @{
-        ClientId = $clientId
-        ClientSecret = $clientSecret
-    }),
-    ([System.String[]]@("https://www.googleapis.com/auth/drive.readonly")),
-    "user",
-    [System.Threading.CancellationToken]::None
-).Result
-
-$googleDriveService.HttpClient.DefaultRequestHeaders.Authorization = New-Object System.Net.Http.Headers.AuthenticationHeaderValue(
-    "Bearer",
-    $credential.Token.AccessToken
-)
-
-# Retrieve files from the Google Drive account
-$files = $googleDriveService.Files.List().Execute().Files
-
-# Create the index file
-$indexFilePath = Join-Path -Path $baseDirectory -ChildPath "import_index.txt"
-$indexContent = "List of documents in your-email@email.com Google Drive account:`n`n"
-
-foreach ($file in $files) {
-    $indexContent += "File Name: $($file.Name)`t File ID: $($file.Id)`n"
+  Logger.log('Monthly archive trigger set up to run on the 1st of the month at 7:01 AM.');
 }
 
-$indexContent | Out-File -FilePath $indexFilePath -Encoding utf8
-
-Write-Host "Index file created successfully at $indexFilePath"
+/**
+ * Removes the monthly archive trigger (if it exists).
+ */
+function removeMonthlyArchiveTrigger() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'archiveInbox' && triggers[i].getEventType() === ScriptApp.EventType.CLOCK) {
+      ScriptApp.deleteTrigger(triggers[i]);
+      Logger.log('Monthly archive trigger removed.');
+      return;
+    }
+  }
+  Logger.log('No monthly archive trigger found.');
+}
