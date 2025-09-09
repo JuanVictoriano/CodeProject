@@ -1,5 +1,5 @@
 /**
- * Archives all emails in the inbox on a monthly basis, by Juan Victoriano.
+ * this Google Script is essential for service accounts authorized in third-party email clients, email fetching can slow down if the inbox is too heavy, archive all emails in a monthly basis to improve effiency.
  */
 function archiveInbox() {
   var inbox = GmailApp.getInboxThreads();
